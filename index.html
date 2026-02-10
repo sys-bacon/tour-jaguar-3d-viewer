@@ -32,15 +32,15 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 ---------------------------------- */
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x202020);
+scene.background = null;
 
 const camera = new THREE.PerspectiveCamera(
-  50,
+  28,
   window.innerWidth / window.innerHeight,
   0.1,
   100
 );
-camera.position.set(0, 1.5, 3);
+camera.position.set(0, 1.0, 3);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -68,7 +68,7 @@ let mixer;
 let currentAction;
 
 loader.load(
-  './howie_anims.glb', // <-- replace with your model path
+  './howie_anims_v2.glb', // <-- replace with your model path
   (gltf) => {
     const model = gltf.scene;
     scene.add(model);
