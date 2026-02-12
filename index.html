@@ -34,8 +34,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const scene = new THREE.Scene();
 scene.background = null;
 
-var model_gltf;
-
 const camera = new THREE.PerspectiveCamera(
   28,
   window.innerWidth / window.innerHeight,
@@ -68,19 +66,18 @@ const clock = new THREE.Clock();
 
 let mixer;
 let currentAction;
-
+let allAnimations = [];
 loader.load(
   './howie_anims_v2.glb', // <-- replace with your model path
   (gltf) => {
     const model = gltf.scene;
     scene.add(model);
 
-    model_gltf = gltf;
-
     // Optional: normalize model scale/position
     model.position.set(0, 0, 0);
     model.scale.set(1, 1, 1);
 
+    allAnimations = gltf.animations; // Guardamos las animaciones aquí
     mixer = new THREE.AnimationMixer(model);
 
     // Log animation names (very useful!)
@@ -90,14 +87,18 @@ loader.load(
       console.log(window.document.URL)
     });
 
+    const model_gltf = gltf;
 
+    /*
     // 👇 CHANGE THIS to your animation name depending on current url
     if(window.document.URL == "http://127.0.0.1:5500/index.html"){
       playAnimation('animacion 1', gltf.animations);
     }else{
       playAnimation('animacion 2', gltf.animations);
     }
-    
+    */
+    playAnimation('animacion 1', gltf.animations);
+
   },
   undefined,
   (error) => {
@@ -186,14 +187,14 @@ function onPointerDown(event) {
         console.log('Object clicked:', clickedObject.name);
 
         // Call your custom function here
-        playAnimation('animacion 2', model_gltf.animations);
+        playAnimation('animacion 2', allAnimations);
     }
 }
 
 window.onmessage = (event) => {
   if (event.data) {
     console.log("Estoy en la página: " + event.data);
-    playAnimation(event.data, model_gltf.animations)
+    playAnimation(event.data, allAnimations)
     // Aquí puedes usar la URL recibida en tu lógica
   }
 };
