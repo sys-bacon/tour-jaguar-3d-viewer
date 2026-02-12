@@ -34,8 +34,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const scene = new THREE.Scene();
 scene.background = null;
 
-var model_gltf;
-
 const camera = new THREE.PerspectiveCamera(
   28,
   window.innerWidth / window.innerHeight,
@@ -75,8 +73,6 @@ loader.load(
     const model = gltf.scene;
     scene.add(model);
 
-    model_gltf = gltf;
-
     // Optional: normalize model scale/position
     model.position.set(0, 0, 0);
     model.scale.set(1, 1, 1);
@@ -90,8 +86,8 @@ loader.load(
       console.log(window.document.URL)
     });
 
+    // 👇 CHANGE THIS to your animation name
 
-    // 👇 CHANGE THIS to your animation name depending on current url
     if(window.document.URL == "http://127.0.0.1:5500/index.html"){
       playAnimation('animacion 1', gltf.animations);
     }else{
@@ -118,11 +114,6 @@ function playAnimation(name, animations) {
   }
 
   const action = mixer.clipAction(clip);
-
-  if(currentAction == action){
-    console.log("same animation")
-    return
-  }
 
   if (currentAction) {
     currentAction.fadeOut(0.3);
@@ -160,48 +151,6 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-/* ----------------------------------
-   Interaction Handling
----------------------------------- */
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-window.addEventListener('pointerdown', onPointerDown, false);
-
-function onPointerDown(event) {
-    // Calculate normalized device coordinates (-1 to +1)
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; // Y is inverted
-
-    // Update the raycaster with the camera and mouse position
-    raycaster.setFromCamera(mouse, camera);
-
-    // Calculate objects intersecting the picking ray
-    const intersects = raycaster.intersectObjects(scene.children, true); // Set recursive to true if needed
-
-    if (intersects.length > 0) {
-        // The first object in the array is the closest one to the camera
-        const clickedObject = intersects[0].object;
-        console.log('Object clicked:', clickedObject.name);
-
-        // Call your custom function here
-        playAnimation('animacion 2', model_gltf.animations);
-    }
-}
-
-window.onmessage = (event) => {
-  if (event.data) {
-    console.log("Estoy en la página: " + event.data);
-    playAnimation(event.data, model_gltf.animations)
-    // Aquí puedes usar la URL recibida en tu lógica
-  }
-};
-
-// Avisamos a Wix que el HTML ya cargó y está listo para recibir la URL
-window.parent.postMessage("ready", "*");
-
-
 </script>
 
 </body>
