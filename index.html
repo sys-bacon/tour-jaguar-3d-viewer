@@ -67,44 +67,51 @@ const clock = new THREE.Clock();
 let mixer;
 let currentAction;
 let allAnimations = [];
+let pendingAnimation = null; // <-- Nueva variable para guardar el mensaje si el modelo no ha cargado
+
 loader.load(
-  './howie_anims_v2.glb', // <-- replace with your model path
+  './howie_anims_v2.glb', 
   (gltf) => {
     const model = gltf.scene;
     scene.add(model);
 
-    // Optional: normalize model scale/position
-    model.position.set(0, 0, 0);
-    model.scale.set(1, 1, 1);
-
-    allAnimations = gltf.animations; // Guardamos las animaciones aquí
+    allAnimations = gltf.animations; 
     mixer = new THREE.AnimationMixer(model);
 
-    // Log animation names (very useful!)
-    console.log('Available animations:');
-    gltf.animations.forEach((clip) => {
-      console.log(clip.name);
-      console.log(window.document.URL)
-    });
+    console.log('Model loaded. Available:', allAnimations.map(a => a.name));
 
-    const model_gltf = gltf;
-
-    /*
-    // 👇 CHANGE THIS to your animation name depending on current url
-    if(window.document.URL == "http://127.0.0.1:5500/index.html"){
-      playAnimation('animacion 1', gltf.animations);
-    }else{
-      playAnimation('animacion 2', gltf.animations);
+    // Si Wix envió una animación antes de que el modelo cargara, la ejecutamos ahora
+    if (pendingAnimation) {
+      playAnimation(pendingAnimation, allAnimations);
+      pendingAnimation = null; 
+    } else {
+      // Animación por defecto
+      playAnimation('animacion 1', allAnimations);
     }
-    */
-    playAnimation('animacion 1', gltf.animations);
-
   },
   undefined,
-  (error) => {
-    console.error(error);
-  }
+  (error) => console.error(error)
 );
+
+/* --- Control de Mensajes --- */
+
+window.onmessage = (event) => {
+  if (event.data) {
+    const animName = event.data;
+    
+    // Si el modelo ya cargó (allAnimations tiene datos), ejecutamos
+    if (allAnimations.length > 0) {
+      playAnimation(animName, allAnimations);
+    } else {
+      // Si no ha cargado, guardamos el nombre para después
+      pendingAnimation = animName;
+      console.log("Modelo no listo, guardando animación: " + animName);
+    }
+  }
+};
+
+// Avisar a Wix que el iFrame está listo
+window.parent.postMessage("ready", "*");
 
 /* ----------------------------------
    Animation Control
