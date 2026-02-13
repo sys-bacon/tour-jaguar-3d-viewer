@@ -203,18 +203,6 @@ function onPointerDown(event) {
     }
 }
 
-window.onmessage = (event) => {
-  if (event.data) {
-    console.log("Estoy en la página: " + event.data);
-    playAnimation(event.data, allAnimations)
-    // Aquí puedes usar la URL recibida en tu lógica
-  }
-};
-
-// Avisamos a Wix que el HTML ya cargó y está listo para recibir la URL
-window.parent.postMessage("ready", "*");
-
-
 </script>
 
 </body>
