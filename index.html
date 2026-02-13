@@ -194,7 +194,11 @@ function onPointerDown(event) {
 window.onmessage = (event) => {
   if (event.data) {
     console.log("Estoy en la página: " + event.data);
-    playAnimation(event.data, allAnimations)
+    if(event.data == "animacion 1"){
+      playAnimation('animacion 1', allAnimations);
+    }else if(event.data == "animacion 2"){
+      playAnimation('animacion 2', allAnimations);
+    }
     // Aquí puedes usar la URL recibida en tu lógica
   }
 };
