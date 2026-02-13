@@ -120,6 +120,11 @@ window.parent.postMessage("ready", "*");
 function playAnimation(name, animations) {
   const clip = THREE.AnimationClip.findByName(animations, name);
 
+  console.log("current anim name")
+  console.log(name)
+  console.log("current anim object")
+  console.log(animations)
+
   if (!clip) {
     console.warn(`Animation "${name}" not found`);
     return;
@@ -201,11 +206,7 @@ function onPointerDown(event) {
 window.onmessage = (event) => {
   if (event.data) {
     console.log("Estoy en la página: " + event.data);
-    if(event.data == "animacion 1"){
-      playAnimation('animacion 1', allAnimations);
-    }else if(event.data == "animacion 2"){
-      playAnimation('animacion 2', allAnimations);
-    }
+    playAnimation(event.data, allAnimations)
     // Aquí puedes usar la URL recibida en tu lógica
   }
 };
