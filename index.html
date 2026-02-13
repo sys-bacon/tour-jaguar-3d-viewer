@@ -66,9 +66,11 @@ const clock = new THREE.Clock();
 
 let mixer;
 let currentAction;
-let allAnimations = [];
-let pendingAnimation = null; // <-- Nueva variable para guardar el mensaje si el modelo no ha cargado
+let allAnimations = []; // Asegúrate de que esta variable sea global al script
+let pendingAnimation = null;
 
+// NOTA: En Wix, usa la URL completa de tu archivo (https://...) 
+// si el modelo no carga.
 loader.load(
   './howie_anims_v2.glb', 
   (gltf) => {
@@ -78,39 +80,47 @@ loader.load(
     allAnimations = gltf.animations; 
     mixer = new THREE.AnimationMixer(model);
 
-    console.log('Model loaded. Available:', allAnimations.map(a => a.name));
+    console.log('--- MODELO CARGADO ---');
+    console.log('Animaciones disponibles:', allAnimations.map(a => a.name));
 
-    // Si Wix envió una animación antes de que el modelo cargara, la ejecutamos ahora
+    // Ejecutar lo que Wix pidió mientras cargábamos
     if (pendingAnimation) {
+      console.log('Ejecutando animación pendiente:', pendingAnimation);
       playAnimation(pendingAnimation, allAnimations);
       pendingAnimation = null; 
     } else {
-      // Animación por defecto
       playAnimation('animacion 1', allAnimations);
     }
   },
   undefined,
-  (error) => console.error(error)
+  (error) => console.error("Error cargando GLB:", error)
 );
 
-/* --- Control de Mensajes --- */
+/* ----------------------------------
+   Control de Mensajes (Wix a HTML)
+---------------------------------- */
 
-window.onmessage = (event) => {
-  if (event.data) {
-    const animName = event.data;
-    
-    // Si el modelo ya cargó (allAnimations tiene datos), ejecutamos
-    if (allAnimations.length > 0) {
-      playAnimation(animName, allAnimations);
-    } else {
-      // Si no ha cargado, guardamos el nombre para después
-      pendingAnimation = animName;
-      console.log("Modelo no listo, guardando animación: " + animName);
-    }
+window.addEventListener('message', (event) => {
+  // 1. Filtramos mensajes que no sean strings (Wix a veces envía objetos internos)
+  if (typeof event.data !== 'string') return;
+  
+  // 2. Ignoramos mensajes de sistema de Wix
+  if (event.data.includes("setAnalytics") || event.data === "") return;
+
+  const animName = event.data;
+  console.log("Mensaje recibido de Wix:", animName);
+
+  if (allAnimations && allAnimations.length > 0) {
+    // El modelo ya existe, ejecutamos
+    playAnimation(animName, allAnimations);
+  } else {
+    // El modelo aún no carga, guardamos el nombre
+    console.log("El modelo aún no carga, guardando:", animName);
+    pendingAnimation = animName;
   }
-};
+});
 
-// Avisar a Wix que el iFrame está listo
+// Avisar a Wix que el iFrame cargó el JS inicial
 window.parent.postMessage("ready", "*");
 
 /* ----------------------------------
