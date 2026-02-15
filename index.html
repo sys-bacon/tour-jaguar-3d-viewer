@@ -68,6 +68,7 @@ let mixer;
 let currentAction;
 let allAnimations = []; // Asegúrate de que esta variable sea global al script
 let pendingAnimation = null;
+let clickAnimation;
 
 // NOTA: En Wix, usa la URL completa de tu archivo (https://...) 
 // si el modelo no carga.
@@ -110,6 +111,14 @@ window.addEventListener('message', (event) => {
   const animName = event.data;
   console.log("Mensaje recibido de Wix:", animName);
 
+  if(animName == "clap"){
+    clickAnimation = "greet"
+  }else if(animName == "greet"){
+    clickAnimation = "clap"
+  }else{
+    clickAnimation = "greet"
+  }
+
   if (allAnimations && allAnimations.length > 0) {
     // El modelo ya existe, ejecutamos
     playAnimation(animName, allAnimations);
@@ -136,6 +145,11 @@ function playAnimation(name, animations) {
   }
 
   let action = mixer.clipAction(clip);
+  let idle_action = mixer.clipAction(THREE.AnimationClip.findByName(animations, "idle"));
+
+  if(currentAction == idle_action){
+    action = mixer.clipAction(THREE.AnimationClip.findByName(animations, "greet"));
+  }
 
   if(currentAction == action){
     console.log("same animation")
